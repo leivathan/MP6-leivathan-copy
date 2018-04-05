@@ -34,7 +34,7 @@ reporting:
 notes:
   "Note that the maximum local grade is 80/100. 10 points will be provided
   during official grading if you have committed code that earns at least 40
-  points by Monday 4/9/2018 at 5PM. 10 points are for correctly completing
+  points by Wednesday 4/11/2018 at 5PM. 10 points are for correctly completing
   isRick, which are not providing test cases for."
 checkstyle:
   name: "checkstyle Tests"
