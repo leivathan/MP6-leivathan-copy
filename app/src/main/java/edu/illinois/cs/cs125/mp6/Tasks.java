@@ -14,7 +14,6 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.HttpResponse;
 import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.StringRequest;
 
@@ -62,6 +61,9 @@ class Tasks {
             requestQueue = setRequestQueue;
         }
 
+        /**
+         * Before we start draw the waiting indicator.
+         */
         @Override
         protected void onPreExecute() {
             MainActivity activity = activityReference.get();
@@ -92,8 +94,14 @@ class Tasks {
                     new Response.Listener<Bitmap>() {
                         @Override
                         public void onResponse(final Bitmap response) {
+                            /*
+                             * If the download succeeded, try to draw the image on the screen.
+                             */
                             activity.updateCurrentBitmap(response, true);
                             try {
+                                /*
+                                 * And also try to save the image.
+                                 */
                                 File outputFile = activity.getSaveFilename();
                                 if (outputFile == null) {
                                     throw new Exception("null output file");
@@ -103,12 +111,12 @@ class Tasks {
                                         DEFAULT_COMPRESSION_QUALITY_LEVEL, outputStream);
                                 outputStream.flush();
                                 outputStream.close();
-
                                 activity.addPhotoToGallery(Uri.fromFile(outputFile));
                             } catch (Exception e) {
                                 Log.w(TAG, "Problem saving image: " + e);
                             }
 
+                            // Clear the progress bar
                             ProgressBar progressBar = activity.findViewById(R.id.progressBar);
                             progressBar.setVisibility(View.INVISIBLE);
                         }
@@ -117,11 +125,11 @@ class Tasks {
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(final VolleyError e) {
+                            // If the download failed alert the user and clear the progress bar
                             Toast.makeText(activity.getApplicationContext(),
                                     "Image download failed",
                                     Toast.LENGTH_LONG).show();
                             Log.w(TAG, "Image download failed: " + e);
-
                             ProgressBar progressBar = activity.findViewById(R.id.progressBar);
                             progressBar.setVisibility(View.INVISIBLE);
                         }
@@ -140,14 +148,14 @@ class Tasks {
         private static final String MS_CV_API_URL =
                 "https://westcentralus.api.cognitive.microsoft.com/vision/v1.0/analyze";
 
-        /** Default visual features to request. */
+        /** Default visual features to request. You may need to change this value. */
         private static final String MS_CV_API_DEFAULT_VISUAL_FEATURES =
                 "Categories,Description,Faces,ImageType,Color,Adult";
 
         /** Default visual features to request. */
         private static final String MS_CV_API_DEFAULT_LANGUAGE = "en";
 
-        /** Default visual features to request. */
+        /** Default visual features to request. You may need to change this value. */
         private static final String MS_CV_API_DEFAULT_DETAILS = "Landmarks";
 
         /** Subscription key. */
@@ -173,6 +181,9 @@ class Tasks {
             requestQueue = setRequestQueue;
         }
 
+        /**
+         * Before we start draw the waiting indicator.
+         */
         @Override
         protected void onPreExecute() {
             MainActivity activity = activityReference.get();
@@ -197,6 +208,8 @@ class Tasks {
             final ByteArrayOutputStream stream = new ByteArrayOutputStream();
             currentBitmap[0].compress(Bitmap.CompressFormat.PNG,
                     DEFAULT_COMPRESSION_QUALITY_LEVEL, stream);
+
+            // Prepare our API request
             String requestURL = Uri.parse(MS_CV_API_URL)
                     .buildUpon()
                     .appendQueryParameter("visualFeatures", MS_CV_API_DEFAULT_VISUAL_FEATURES)
@@ -214,6 +227,7 @@ class Tasks {
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(final String response) {
+                            // On success, clear the progress bar and call finishProcessImage
                             Log.d(TAG, "Response: " + response);
                             MainActivity activity = activityReference.get();
                             if (activity == null || activity.isFinishing()) {
@@ -226,6 +240,7 @@ class Tasks {
                     }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(final VolleyError error) {
+                    // On failure just clear the progress bar
                     Log.w(TAG, "Error: " + error.toString());
                     NetworkResponse networkResponse = error.networkResponse;
                     if (networkResponse != null &&
@@ -243,6 +258,7 @@ class Tasks {
             }) {
                 @Override
                 public Map<String, String> getHeaders() {
+                    // Set up headers properly
                     Map<String, String> headers = new HashMap<>();
                     headers.put("Content-Type", "application/octet-stream");
                     headers.put("Ocp-Apim-Subscription-Key", SUBSCRIPTION_KEY);
@@ -250,6 +266,7 @@ class Tasks {
                 }
                 @Override
                 public String getBodyContentType() {
+                    // Set the body content type properly for a binary upload
                     return "application/octet-stream";
                 }
                 @Override

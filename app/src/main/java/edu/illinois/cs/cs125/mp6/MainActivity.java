@@ -69,13 +69,23 @@ public final class MainActivity extends AppCompatActivity {
     /** Whether we can write to public storage. */
     private boolean canWriteToPublicStorage = false;
 
+    /**
+     * Run when our activity comes into view.
+     *
+     * @param savedInstanceState state that was saved by the activity last time it was paused
+     */
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         requestQueue = Volley.newRequestQueue(this);
 
         super.onCreate(savedInstanceState);
+
+        // Load the main layout for our activity
         setContentView(R.layout.activity_main);
 
+        /*
+         * Set up handlers for each button in our UI. These run when the buttons are clicked.
+         */
         final ImageButton openFile = findViewById(R.id.openFile);
         openFile.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -100,7 +110,6 @@ public final class MainActivity extends AppCompatActivity {
                 startDownloadFile();
             }
         });
-
         final ImageButton rotateLeft = findViewById(R.id.rotateLeft);
         rotateLeft.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -117,31 +126,48 @@ public final class MainActivity extends AppCompatActivity {
                 startProcessImage();
             }
         });
+
+        // There are a few button that we disable into an image has been loaded
         enableOrDisableButtons(false);
 
+        // We also want to make sure that our progress bar isn't spinning, and style it a bit
         ProgressBar progressBar = findViewById(R.id.progressBar);
         progressBar.setVisibility(View.INVISIBLE);
         progressBar.getIndeterminateDrawable()
                 .setColorFilter(getResources()
                         .getColor(R.color.colorPrimaryDark), PorterDuff.Mode.SRC_IN);
 
+        /*
+         * Here we check for permission to write to external storage and request it if necessary.
+         * Normally you would not want to do this on ever start, but we want to be persistent
+         * since it makes development a lot easier.
+         */
         canWriteToPublicStorage = (ContextCompat.checkSelfPermission(MainActivity.this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);
         Log.d(TAG, "Do we have permission to write to external storage: "
                 + canWriteToPublicStorage);
-
         if (!canWriteToPublicStorage) {
             ActivityCompat.requestPermissions(MainActivity.this,
                     new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     REQUEST_WRITE_STORAGE);
         }
-
-
     }
 
+    /**
+     * Called when an intent that we requested has finished.
+     *
+     * In our case, we either asked the file browser to open a file, or the camera to take a
+     * photo. We respond appropriately below.
+     *
+     * @param requestCode the code that we used to make the request
+     * @param resultCode a code indicating what happened: success or failure
+     * @param resultData any data returned by the activity
+     */
     @Override
     public void onActivityResult(final int requestCode, final int resultCode,
                                  final Intent resultData) {
+
+        // If something went wrong we simply log a warning and return
         if (resultCode != Activity.RESULT_OK) {
             Log.w(TAG, "onActivityResult with code " + requestCode + " failed");
             if (requestCode == IMAGE_CAPTURE_REQUEST_CODE) {
@@ -149,6 +175,8 @@ public final class MainActivity extends AppCompatActivity {
             }
             return;
         }
+
+        // Otherwise we get a link to the photo either from the file browser or the camera,
         Uri currentPhotoURI;
         if (requestCode == READ_REQUEST_CODE) {
             currentPhotoURI = resultData.getData();
@@ -162,6 +190,8 @@ public final class MainActivity extends AppCompatActivity {
             Log.w(TAG, "Unhandled activityResult with code " + requestCode);
             return;
         }
+
+        // Now load the photo into the view
         Log.d(TAG, "Photo selection produced URI " + currentPhotoURI);
         loadPhoto(currentPhotoURI);
     }
@@ -190,16 +220,19 @@ public final class MainActivity extends AppCompatActivity {
             return;
         }
 
+        // Set up an intent to launch the camera app and have it take a photo for us
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         currentPhotoFile = getSaveFilename();
         if (takePictureIntent.resolveActivity(getPackageManager()) == null
                 || currentPhotoFile == null) {
+            // Alert the user if there was a problem taking the photo
             Toast.makeText(getApplicationContext(), "Problem taking photo",
                     Toast.LENGTH_LONG).show();
             Log.w(TAG, "Problem taking photo");
             return;
         }
 
+        // Configure and launch the intent
         Uri photoURI = FileProvider.getUriForFile(this,
                 "edu.illinois.cs.cs125.mp6.fileprovider", currentPhotoFile);
         takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
@@ -212,19 +245,21 @@ public final class MainActivity extends AppCompatActivity {
 
     /** Initiate the file download process. */
     private void startDownloadFile() {
+
+        // Build a dialog that we will use to ask for the URL to the photo
+
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         builder.setTitle("Download File");
-
         final EditText input = new EditText(MainActivity.this);
         input.setInputType(InputType.TYPE_CLASS_TEXT);
         builder.setView(input);
-
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(final DialogInterface dialog, final int unused) {
+
+                // If the user clicks OK, try and download the file
                 downloadFileURL = input.getText().toString().trim();
                 Log.d(TAG, "Got download URL " + downloadFileURL);
-
                 new Tasks.DownloadFileTask(MainActivity.this, requestQueue)
                         .execute(downloadFileURL);
             }
@@ -235,6 +270,8 @@ public final class MainActivity extends AppCompatActivity {
                 dialog.cancel();
             }
         });
+
+        // Display the dialog
         builder.show();
     }
 
@@ -258,7 +295,6 @@ public final class MainActivity extends AppCompatActivity {
 
         Matrix matrix = new Matrix();
         matrix.postRotate(ROTATE_LEFT);
-
         updateCurrentBitmap(Bitmap.createBitmap(currentBitmap,
                 0, 0, currentBitmap.getWidth(), currentBitmap.getHeight(), matrix, true), false);
     }
@@ -271,6 +307,11 @@ public final class MainActivity extends AppCompatActivity {
             Log.w(TAG, "No image selected");
             return;
         }
+
+        /*
+         * Launch our background task which actually makes the request. It will call
+         * finishProcessImage below with the JSON string when it finishes.
+         */
         new Tasks.ProcessImageTask(MainActivity.this, requestQueue)
                 .execute(currentBitmap);
     }
@@ -305,6 +346,11 @@ public final class MainActivity extends AppCompatActivity {
          */
         TextView photoInfo = findViewById(R.id.photoInfo);
         photoInfo.setText(description);
+
+        /*
+         * Add code here to show the caption, show or hide the dog and cat icons,
+         * and deal with Rick.
+         */
     }
 
     /** Current bitmap we are working with. */
@@ -312,6 +358,8 @@ public final class MainActivity extends AppCompatActivity {
 
     /**
      * Process a photo.
+     *
+     * Resizes an image and loads it into the UI.
      *
      * @param currentPhotoURI URI of the image to process
      */
@@ -353,6 +401,9 @@ public final class MainActivity extends AppCompatActivity {
             return;
         }
 
+        /*
+         * Resize the image appropriately for the display.
+         */
         final ImageView photoView = findViewById(R.id.photoView);
         int targetWidth = photoView.getWidth();
         int targetHeight = photoView.getHeight();
@@ -370,9 +421,14 @@ public final class MainActivity extends AppCompatActivity {
         modifyOptions.inSampleSize = scaleFactor;
         modifyOptions.inPurgeable = true;
 
+        // Actually draw the image
         updateCurrentBitmap(BitmapFactory.decodeByteArray(imageData,
                 0, imageData.length, modifyOptions), true);
     }
+
+    /*
+     * Helper functions follow.
+     */
 
     /**
      * Update the currently displayed image.
