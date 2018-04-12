@@ -4,6 +4,9 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+/**
+ * Recognizes a photo for many circumstances.
+ */
 public final class RecognizePhoto {
 
     /**
@@ -76,7 +79,14 @@ public final class RecognizePhoto {
         String text = data.get("text").getAsString();
         return text;
     }
-    public static boolean isACat(final String json, double minConfidence) {
+
+    /**
+     *
+     * @param json the JSON passed by Microsoft Cognitive Services API
+     * @param minConfidence the minimum confidence to test against
+     * @return true if a cat, false all else
+     */
+    public static boolean isACat (final String json, final double minConfidence) {
         if (json == null) {
             return false;
         }
@@ -91,7 +101,16 @@ public final class RecognizePhoto {
         }
         return false;
     }
-    public static boolean isADog (final String json, double minConfidence) {
+
+    /**
+     *
+     * Determines doghood.
+     *
+     * @param json JSON from Marcosorft
+     * @param minConfidence minimum confidence to check against
+     * @return true if dog, false all else
+     */
+    public static boolean isADog (final String json, final double minConfidence) {
         if (json == null) {
             return false;
         }
@@ -106,6 +125,14 @@ public final class RecognizePhoto {
         }
         return false;
     }
+
+    /**
+     *
+     * Will he give you up? Will he let you down?
+     *
+     * @param json JSON of a picture of (hopefully) rick astley
+     * @return true if never gonna give never gonna give, false if he did
+     */
     public static boolean isRick (final String json) {
         if (json == null) {
             return false;
