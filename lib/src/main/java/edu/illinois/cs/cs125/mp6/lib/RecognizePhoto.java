@@ -1,5 +1,9 @@
 package edu.illinois.cs.cs125.mp6.lib;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 public final class RecognizePhoto {
 
     /**
@@ -9,7 +13,14 @@ public final class RecognizePhoto {
      * @return the width of the image or 0 on failure
      */
     public static int getWidth(final String json) {
-        return 0;
+        if (json == null) {
+            return 0;
+        }
+        JsonParser parser = new JsonParser();
+        JsonObject result = parser.parse(json).getAsJsonObject();
+        JsonObject meta = result.get("metadata").getAsJsonObject();
+        int width = meta.get("width").getAsInt();
+        return width;
     }
 
     /**
@@ -19,7 +30,14 @@ public final class RecognizePhoto {
      * @return the width of the image or 0 on failure
      */
     public static int getHeight(final String json) {
-        return 0;
+        if (json == null) {
+            return 0;
+        }
+        JsonParser parser = new JsonParser();
+        JsonObject result = parser.parse(json).getAsJsonObject();
+        JsonObject meta = result.get("metadata").getAsJsonObject();
+        int height = meta.get("height").getAsInt();
+        return height;
     }
 
     /**
@@ -29,6 +47,31 @@ public final class RecognizePhoto {
      * @return the type of the image or null
      */
     public static String getFormat(final String json) {
-        return "";
+        if (json == null) {
+            return null;
+        }
+        JsonParser parser = new JsonParser();
+        JsonObject result = parser.parse(json).getAsJsonObject();
+        JsonObject meta = result.get("metadata").getAsJsonObject();
+        String format = meta.get("format").getAsString();
+        return format;
+    }
+
+    /**
+     *
+     * @param json the JSON string returned by the Microsoft Cognitive Services API
+     * @return the caption of the image or null
+     */
+    public static String getCaption(final String json) {
+        if (json == null) {
+            return null;
+        }
+        JsonParser parser = new JsonParser();
+        JsonObject result = parser.parse(json).getAsJsonObject();
+        JsonObject describe = result.get("description").getAsJsonObject();
+        JsonArray captions = describe.get("captions").getAsJsonArray();
+        JsonObject data = captions.get(0).getAsJsonObject();
+        String text = data.get("text").getAsString();
+        return text;
     }
 }
