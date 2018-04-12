@@ -85,7 +85,7 @@ public final class RecognizePhoto {
         JsonArray tags = result.get("tags").getAsJsonArray();
         for (int i = 0; i < tags.size(); i++) {
             if (tags.get(i).getAsJsonObject().get("name").getAsString().equals("cat")
-                    && tags.get(i).getAsJsonObject().get("confindence").getAsDouble() == minConfidence) {
+                    && tags.get(i).getAsJsonObject().get("confindence").getAsDouble() >= minConfidence) {
                 return true;
             }
         }
@@ -100,7 +100,7 @@ public final class RecognizePhoto {
         JsonArray tags = result.get("tags").getAsJsonArray();
         for (int i = 0; i < tags.size(); i++) {
             if (tags.get(i).getAsJsonObject().get("name").getAsString().equals("dog")
-                    && tags.get(i).getAsJsonObject().get("confindence").getAsDouble() == minConfidence) {
+                    && tags.get(i).getAsJsonObject().get("confindence").getAsDouble() >= minConfidence) {
                 return true;
             }
         }
