@@ -59,6 +59,8 @@ public final class RecognizePhoto {
 
     /**
      *
+     * Get the image caption.
+     *
      * @param json the JSON string returned by the Microsoft Cognitive Services API
      * @return the caption of the image or null
      */
@@ -73,5 +75,42 @@ public final class RecognizePhoto {
         JsonObject data = captions.get(0).getAsJsonObject();
         String text = data.get("text").getAsString();
         return text;
+    }
+    public static boolean isACat(final String json, double minConfidence) {
+        if (json == null) {
+            return false;
+        }
+        JsonParser parser = new JsonParser();
+        JsonObject result = parser.parse(json).getAsJsonObject();
+        JsonArray tags = result.get("tags").getAsJsonArray();
+        for (int i = 0; i < tags.size(); i++) {
+            if (tags.get(i).getAsJsonObject().get("name").getAsString().equals("cat")
+                    && tags.get(i).getAsJsonObject().get("confindence").getAsDouble() == minConfidence) {
+                return true;
+            }
+        }
+        return false;
+    }
+    public static boolean isADog (final String json, double minConfidence) {
+        if (json == null) {
+            return false;
+        }
+        JsonParser parser = new JsonParser();
+        JsonObject result = parser.parse(json).getAsJsonObject();
+        JsonArray tags = result.get("tags").getAsJsonArray();
+        for (int i = 0; i < tags.size(); i++) {
+            if (tags.get(i).getAsJsonObject().get("name").getAsString().equals("dog")
+                    && tags.get(i).getAsJsonObject().get("confindence").getAsDouble() == minConfidence) {
+                return true;
+            }
+        }
+        return false;
+    }
+    public static boolean isRick (final String json) {
+        if (json == null) {
+            return false;
+        }
+        JsonParser parser = new JsonParser();
+        JsonObject result = parser.parse(json).getAsJsonObject();
     }
 }
