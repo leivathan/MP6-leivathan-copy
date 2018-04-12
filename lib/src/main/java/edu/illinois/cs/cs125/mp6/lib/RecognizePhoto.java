@@ -86,7 +86,7 @@ public final class RecognizePhoto {
      * @param minConfidence the minimum confidence to test against
      * @return true if a cat, false all else
      */
-    public static boolean isACat (final String json, final double minConfidence) {
+    public static boolean isACat(final String json, final double minConfidence) {
         if (json == null) {
             return false;
         }
@@ -110,7 +110,7 @@ public final class RecognizePhoto {
      * @param minConfidence minimum confidence to check against
      * @return true if dog, false all else
      */
-    public static boolean isADog (final String json, final double minConfidence) {
+    public static boolean isADog(final String json, final double minConfidence) {
         if (json == null) {
             return false;
         }
@@ -133,7 +133,7 @@ public final class RecognizePhoto {
      * @param json JSON of a picture of (hopefully) rick astley
      * @return true if never gonna give never gonna give, false if he did
      */
-    public static boolean isRick (final String json) {
+    public static boolean isRick(final String json) {
         if (json == null) {
             return false;
         }
