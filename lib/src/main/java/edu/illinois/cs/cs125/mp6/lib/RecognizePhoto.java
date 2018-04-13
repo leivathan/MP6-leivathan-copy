@@ -153,7 +153,7 @@ public final class RecognizePhoto {
                     }
                 }
             }
-        } catch (NullPointerException) {
+        } catch (NullPointerException celebrities) {
             return false;
         }
         return json.contains("Rick Astley");
