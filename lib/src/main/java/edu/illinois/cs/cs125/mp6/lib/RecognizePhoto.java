@@ -131,10 +131,6 @@ public final class RecognizePhoto {
     }
 
     /**
-     * An int for finding the third number.
-     */
-    private static final int three = 3;
-    /**
      *
      * Will he give you up? Will he let you down?
      *
