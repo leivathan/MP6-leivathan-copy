@@ -138,7 +138,24 @@ public final class RecognizePhoto {
      * @return true if never gonna give never gonna give, false if he did
      */
     public static boolean isRick(final String json) {
-        boolean rick = json.contains("Rick Astley");
-        return rick;
+        JsonParser parser = new JsonParser();
+        JsonObject result = parser.parse(json).getAsJsonObject();
+        try {
+            JsonArray categories = result.get("categories").getAsJsonArray();
+            for (int i = 0; i < categories.size(); i++) {
+                if (categories.get(i).getAsString().equals("detail")) {
+                    JsonObject detail = categories.get(i).getAsJsonObject();
+                    JsonArray celebrities = detail.get("celebrities").getAsJsonArray();
+                    for (int j = 0; j < celebrities.size(); j++) {
+                        if (celebrities.get(i).getAsJsonObject().get("name").getAsString().equals("Rick Astley")) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        } catch (NullPointerException) {
+            return false;
+        }
+        return json.contains("Rick Astley");
     }
 }
